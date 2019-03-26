@@ -67,27 +67,19 @@ void setup() {
     blinkLed();
   }
   Blynk.config(auth, BLYNK_SERVER, BLYNK_PORT);
-  //attachInterrupt(digitalPinToInterrupt(PIR), motionISR, CHANGE);
-  t.setInterval(MOTION_POLL, motionISR);
+  attachInterrupt(digitalPinToInterrupt(PIR), motionISR, CHANGE);
+  //t.setInterval(MOTION_POLL, motionISR);
   ArduinoOTA.setHostname("Radiance");
   ArduinoOTA.begin();
 }
 
 void loop() {
-  /*if(otaFlag) {
-    digitalWrite(D_OUT, LOW);
-    long nw = millis();
-    while(millis() < (nw + OTA_INTERVAL)) {
-      ArduinoOTA.handle();
-    }
-    otaFlag = false;
-    Blynk.virtualWrite(V_OTA, 0);
-  }*/
   Blynk.run();
   t.run();
   while(!Blynk.connected()) {
     Blynk.connect();
   }
+  ArduinoOTA.handle();
 }
 
 BLYNK_CONNECTED() {
@@ -101,8 +93,8 @@ BLYNK_WRITE(V_MOTION) {
   switch(param.asInt()) {
     case 1:
       motionFlag = true;
-      setByMotion = true;
       motionTimerId = t.setTimeout(motionTimeout, motionTimeoutISR);
+      t.setTimeout(1000*10L, delayedSetByMotion);
       break;
     case 2:
       motionFlag = false;
@@ -111,6 +103,10 @@ BLYNK_WRITE(V_MOTION) {
   }
   Serial.print("motionFlag = ");
   Serial.println(motionFlag);
+}
+
+void delayedSetByMotion() {
+  setByMotion = true;
 }
 
 BLYNK_WRITE(V_CONTROL) {
@@ -179,13 +175,13 @@ BLYNK_WRITE(V_OTA) {
 }
 
 void motionISR() {
+  Serial.print(String(hour()) + ":" + String(minute()));
   if(digitalRead(PIR) && alarmFlag) {
     Blynk.notify("Motion Detected - " + String(hour()) + ":" + String(minute()));
     Serial.println("Motion Detected - " + String(hour()) + ":" + String(minute()));
   }
-  if(motionFlag && ((hour() > SUNSET) || (hour() < SUNRISE))) {
+  if(motionFlag && ((hour() >= SUNSET) || (hour() <= SUNRISE))) {
   //if(1) {
-    Serial.print(String(hour()) + ":" + String(minute()) + "\tisSensed: " + String(isSensed) + "\tisMotion: ");
     Serial.println(isMotion);
     digitalWrite(LED_MOTION, isMotion);
     if(digitalRead(PIR)) {
