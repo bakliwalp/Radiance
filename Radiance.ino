@@ -4,10 +4,14 @@
 #include <BlynkSimpleEsp8266.h>
 #include <ESP8266WiFi.h>
 #include <WidgetRTC.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 
-#define D_OUT        16//5
+#define D_OUT        5
 #define PIR          4
-#define LED_MOTION   2
+#define LED_MOTION   16
+#define LED_BUILTIN  2
 
 #define V_LED       V0
 #define V_MOTION    V1
@@ -15,12 +19,15 @@
 #define V_TIMEOUT   V3
 #define V_STATUS    V4
 #define V_RESET     V5
+#define V_ALARM     V6
+#define V_OTA       V7
 
 #define SUNSET      18
 #define SUNRISE     7
 #define MOTION_POLL 500L
 #define FADE_DLY  1500
 #define REBOOT_INTERVAL 1*60*1000L
+#define OTA_INTERVAL  1000*60*3
 
 #define BLYNK_PRINT     Serial
 #define BLYNK_SERVER    IPAddress(35,200,226,184)
@@ -30,9 +37,11 @@ WidgetLED led(V_LED);
 WidgetRTC blynkRtc;
 BlynkTimer t;
 
+bool otaFlag = false;
 bool setByMotion = false;
 int motionTimerId = 999;
 bool motionFlag = true;
+bool alarmFlag = false;
 bool isMotion = false;
 bool isSensed = false;
 int lastAnalogWrite;
@@ -60,10 +69,20 @@ void setup() {
   Blynk.config(auth, BLYNK_SERVER, BLYNK_PORT);
   //attachInterrupt(digitalPinToInterrupt(PIR), motionISR, CHANGE);
   t.setInterval(MOTION_POLL, motionISR);
-  //t.setInterval(REBOOT_INTERVAL, reboot);
+  ArduinoOTA.setHostname("Radiance");
+  ArduinoOTA.begin();
 }
 
 void loop() {
+  /*if(otaFlag) {
+    digitalWrite(D_OUT, LOW);
+    long nw = millis();
+    while(millis() < (nw + OTA_INTERVAL)) {
+      ArduinoOTA.handle();
+    }
+    otaFlag = false;
+    Blynk.virtualWrite(V_OTA, 0);
+  }*/
   Blynk.run();
   t.run();
   while(!Blynk.connected()) {
@@ -82,9 +101,12 @@ BLYNK_WRITE(V_MOTION) {
   switch(param.asInt()) {
     case 1:
       motionFlag = true;
+      setByMotion = true;
+      motionTimerId = t.setTimeout(motionTimeout, motionTimeoutISR);
       break;
     case 2:
       motionFlag = false;
+      t.deleteTimer(motionTimerId);
       break;
   }
   Serial.print("motionFlag = ");
@@ -130,7 +152,37 @@ BLYNK_WRITE(V_RESET) {
   }
 }
 
+BLYNK_WRITE(V_ALARM) {
+  switch(param.asInt()) {
+    case 1:
+      alarmFlag = true;
+      break;
+    case 2:
+      alarmFlag = false;
+      break;
+  }
+  Serial.print("alarmFlag = ");
+  Serial.println(alarmFlag);
+}
+
+BLYNK_WRITE(V_OTA) {
+  switch(param.asInt()) {
+    case 0:
+      otaFlag = false;
+      break;
+    case 1:
+      otaFlag = true;
+      break;
+  }
+  Serial.print("otaFlag = ");
+  Serial.println(otaFlag);
+}
+
 void motionISR() {
+  if(digitalRead(PIR) && alarmFlag) {
+    Blynk.notify("Motion Detected - " + String(hour()) + ":" + String(minute()));
+    Serial.println("Motion Detected - " + String(hour()) + ":" + String(minute()));
+  }
   if(motionFlag && ((hour() > SUNSET) || (hour() < SUNRISE))) {
   //if(1) {
     Serial.print(String(hour()) + ":" + String(minute()) + "\tisSensed: " + String(isSensed) + "\tisMotion: ");
@@ -186,7 +238,7 @@ void smoothFade() {
 
 void blinkLed() {
   digitalWrite(LED_BUILTIN, LOW);
-  delay(2);
+  delay(10);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
 }
