@@ -24,7 +24,7 @@
 
 #define SUNSET      18
 #define SUNRISE     7
-#define MOTION_POLL 500L
+#define MOTION_POLL 300L
 #define FADE_DLY  1500
 #define REBOOT_INTERVAL 1*60*1000L
 #define OTA_INTERVAL  1000*60*3
@@ -37,6 +37,7 @@ WidgetLED led(V_LED);
 WidgetRTC blynkRtc;
 BlynkTimer t;
 
+bool isNotified = false;
 bool otaFlag = false;
 bool setByMotion = false;
 int motionTimerId = 999;
@@ -67,8 +68,8 @@ void setup() {
     blinkLed();
   }
   Blynk.config(auth, BLYNK_SERVER, BLYNK_PORT);
-  attachInterrupt(digitalPinToInterrupt(PIR), motionISR, CHANGE);
-  //t.setInterval(MOTION_POLL, motionISR);
+  //attachInterrupt(digitalPinToInterrupt(PIR), motionISR, CHANGE);
+  t.setInterval(MOTION_POLL, motionISR);
   ArduinoOTA.setHostname("Radiance");
   ArduinoOTA.begin();
 }
@@ -84,7 +85,7 @@ void loop() {
 
 BLYNK_CONNECTED() {
   blynkRtc.begin();
-  setSyncInterval(1);
+  setSyncInterval(10*60);
   Serial.println("Connected to Blynk Server on " + String(hour()) + ":" + String(minute()));
   Blynk.syncAll();
 }
@@ -111,12 +112,16 @@ void delayedSetByMotion() {
 
 BLYNK_WRITE(V_CONTROL) {
   int val = param.asInt();
+  int mappedVal = map(val,0, 100, 0, 1023);
+  if(motionFlag) {
+    t.deleteTimer(motionTimerId);
+    motionTimerId = t.setTimeout(motionTimeout, motionTimeoutISR);
+  }
   if(setByMotion) {
     Blynk.virtualWrite(V_MOTION, 2);
     motionFlag = false;
   }
   setByMotion = false;
-  int mappedVal = map(val,0, 100, 0, 1023);
   if(mappedVal >= lastAnalogWrite) {
     for(int i=lastAnalogWrite;i<=mappedVal;i++) {
       analogWrite(D_OUT, i);
@@ -176,9 +181,10 @@ BLYNK_WRITE(V_OTA) {
 
 void motionISR() {
   Serial.print(String(hour()) + ":" + String(minute()));
-  if(digitalRead(PIR) && alarmFlag) {
+  if(digitalRead(PIR) && alarmFlag && !isNotified) {
     Blynk.notify("Motion Detected - " + String(hour()) + ":" + String(minute()));
     Serial.println("Motion Detected - " + String(hour()) + ":" + String(minute()));
+    isNotified = true;
   }
   if(motionFlag && ((hour() >= SUNSET) || (hour() <= SUNRISE))) {
   //if(1) {
@@ -197,6 +203,7 @@ void motionISR() {
     }
     else {
       isMotion = false;
+      isNotified = false;
     }
     isSensed = true;
   }
