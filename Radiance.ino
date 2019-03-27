@@ -117,11 +117,12 @@ BLYNK_WRITE(V_CONTROL) {
     t.deleteTimer(motionTimerId);
     motionTimerId = t.setTimeout(motionTimeout, motionTimeoutISR);
   }
-  if(setByMotion) {
+  /*if(setByMotion) {
     Blynk.virtualWrite(V_MOTION, 2);
     motionFlag = false;
   }
   setByMotion = false;
+  */
   if(mappedVal >= lastAnalogWrite) {
     for(int i=lastAnalogWrite;i<=mappedVal;i++) {
       analogWrite(D_OUT, i);
@@ -142,6 +143,8 @@ BLYNK_WRITE(V_CONTROL) {
 BLYNK_WRITE(V_TIMEOUT) {
   int val = param.asInt();
   motionTimeout = (1000*60*val);
+  t.deleteTimer(motionTimerId);
+  motionTimerId = t.setTimeout(motionTimeout, motionTimeoutISR);
   Serial.print("motionTimeout = ");
   Serial.println(motionTimeout);
 }
@@ -180,7 +183,7 @@ BLYNK_WRITE(V_OTA) {
 }
 
 void motionISR() {
-  Serial.print(String(hour()) + ":" + String(minute()));
+  Serial.println(String(hour()) + ":" + String(minute()));
   if(digitalRead(PIR) && alarmFlag && !isNotified) {
     Blynk.notify("Motion Detected - " + String(hour()) + ":" + String(minute()));
     Serial.println("Motion Detected - " + String(hour()) + ":" + String(minute()));
