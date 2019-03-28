@@ -114,6 +114,7 @@ BLYNK_WRITE(V_CONTROL) {
   int val = param.asInt();
   int mappedVal = map(val,0, 100, 0, 1023);
   if(motionFlag) {
+    setByMotion = true;
     t.deleteTimer(motionTimerId);
     motionTimerId = t.setTimeout(motionTimeout, motionTimeoutISR);
   }
@@ -253,4 +254,3 @@ void reboot() {
   Serial.println("User Reset Requested.");
   ESP.reset();
 }
-
