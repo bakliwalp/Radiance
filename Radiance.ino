@@ -48,7 +48,7 @@ bool isSensed = false;
 int lastAnalogWrite;
 long motionTimeout = 1000*60*1;
 
-char auth[] = "8d155881d7434937b98c5ced72d03610";
+char auth[] = "tMejVGQgCMiN5REr2kp4HNkd0IH4BNba";
 char ssid[] = "The EVIL GENIUS";
 char pass[] = "samadhan118017";
 
@@ -67,7 +67,8 @@ void setup() {
     Serial.print(".");
     blinkLed();
   }
-  Blynk.config(auth, BLYNK_SERVER, BLYNK_PORT);
+  Blynk.config(auth);       // Connect to default server
+  //Blynk.config(auth, BLYNK_SERVER, BLYNK_PORT);
   //attachInterrupt(digitalPinToInterrupt(PIR), motionISR, CHANGE);
   t.setInterval(MOTION_POLL, motionISR);
   ArduinoOTA.setHostname("Radiance");
