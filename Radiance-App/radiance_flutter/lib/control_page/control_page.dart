@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:radiance_flutter/constants.dart';
 import 'package:radiance_flutter/radiance_helper.dart';
 import 'package:radiance_flutter/style.dart';
 
 import '../constants.dart';
 
-class ControlPage extends StatelessWidget {
+class ControlPage extends StatefulWidget {
+  @override
+  _ControlPageState createState() => _ControlPageState();
+}
+
+class _ControlPageState extends State<ControlPage> {
 
   double _sliderValue = 30;
 
@@ -33,10 +39,18 @@ class ControlPage extends StatelessWidget {
         children: <Widget>[
           // ImageCard
           radianceGetCardWidget(radianceHelper.isDarkModeActive(),
-             Image.network(
+             /*Image.network(
               ConstImageURL,
               fit: BoxFit.cover,
               height: MediaQuery.of(context).size.height * 0.4,
+            )*/
+            CachedNetworkImage(
+              imageUrl: ConstImageURL,
+              color: Colors.grey,
+              fit: BoxFit.cover,
+              height: MediaQuery.of(context).size.height * 0.4,
+              placeholder: (context, ConstImageURL) => CircularProgressIndicator(),
+              errorWidget: (context, ConstImageURL, error) => Icon(Icons.error, color: Colors.red),
             )
           ),
           // 2nd widget
@@ -66,21 +80,23 @@ class ControlPage extends StatelessWidget {
                   children: <Widget>[
                     Flexible(
                       flex: 1,
-                      child: Slider(
+                      child: Slider.adaptive(
                         value: _sliderValue,
                         min: 0.0,
                         max: 100.0,
-                        divisions: 100,
+                        label: "$_sliderValue",
+                        inactiveColor: Colors.orange[100],
                         activeColor: Colors.orange,
                         onChanged: (value) {
-                          _sliderValue = value;
+                          setState(() => _sliderValue = value.round().toDouble());
+                          print(_sliderValue);
                         },
                       )
                     ),
                     Container(
-                      width: 40.0,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: 20.0),
+                      width: 50.0,
+                      alignment: Alignment.centerLeft,
+                      //padding: EdgeInsets.only(right: 20.0),
                       child: Text('${_sliderValue.toInt()}',
                         style: radianceGetBodyTextStyle(radianceHelper.isDarkModeActive()),
                       ),
@@ -98,3 +114,4 @@ class ControlPage extends StatelessWidget {
     );
   }
 }
+

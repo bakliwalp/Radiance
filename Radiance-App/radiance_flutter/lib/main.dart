@@ -13,8 +13,6 @@ class RadianceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    RadianceHelper radianceHelper = RadianceHelper(context);
-
     // Force portrait orientation
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -26,14 +24,16 @@ class RadianceApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         appBarTheme: RadianceAppBarThemeDark,
-        canvasColor: Colors.black,
+        canvasColor: Color.fromARGB(0xff, 20,20,20),
         cardTheme: RadianceCardTheme,
+        accentColor: RadianceTextDarkThemeColor,
       ),
       theme: ThemeData(
         brightness: Brightness.light,
         appBarTheme: RadianceAppBarThemeLight,
         primarySwatch: Colors.orange,
         cardTheme: RadianceCardTheme,
+        accentColor: RadianceTextDarkThemeColor,
       ),
     );
   }

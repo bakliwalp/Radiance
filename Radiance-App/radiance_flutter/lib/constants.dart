@@ -12,4 +12,4 @@ const double ConstPadR = 16;
 const double ConstPadT = 12;
 const double ConstPadB = 12;
 
-const String constSliderLabel = "Brightness";
+const String constSliderLabel = "Lamp Brightness";

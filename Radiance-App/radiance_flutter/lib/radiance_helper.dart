@@ -1,5 +1,6 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:radiance_flutter/style.dart';
 
 class RadianceHelper{
@@ -58,7 +59,13 @@ class RadianceHelper{
           content: Text(body, style: radianceGetBodyTextStyle(isDarkModeActive())),
           actions: <Widget>[
             FlatButton(
-              child: Text("Close"),
+              child: Text("Exit"),
+              onPressed: (){
+                SystemNavigator.pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Retry"),
               onPressed: (){
                 Navigator.of(context).pop();
               },

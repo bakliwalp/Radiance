@@ -67,11 +67,25 @@ const RadianceAppBarThemeLight =
     AppBarTheme(textTheme: TextTheme(title: AppBarTextStyleLight));
 
 
-TextStyle radianceGetTitleTextStyle(bool _darkThem) {
-  if (_darkThem) {
-    return TitleTextStyleDark;
+TextStyle radianceGetTitleTextStyle(bool _darkThem, [double _fontSize]) {
+  if(_fontSize == null)
+  {
+    if (_darkThem) {
+      return TextStyle(
+        fontFamily: FontName,
+        fontWeight: FontWeight.w300,
+        fontSize: _fontSize,
+        color: RadianceTextDarkThemeColor,
+      );
+    }
+    return TitleTextStyleLight;
   }
-  return TitleTextStyleLight;
+  else {
+    if (_darkThem) {
+      return TitleTextStyleDark;
+    }
+    return TitleTextStyleLight;
+  }
 }
 
 TextStyle radianceGetBodyTextStyle(bool _darkThem) {
@@ -92,6 +106,7 @@ Card radianceGetCardWidget(bool _darkTheme, Widget _child)
 {
   if(!_darkTheme) {
     return Card(
+      borderOnForeground: true,
       semanticContainer: true,
       clipBehavior: Clip.antiAliasWithSaveLayer,
       shape: RoundedRectangleBorder(
@@ -105,6 +120,7 @@ Card radianceGetCardWidget(bool _darkTheme, Widget _child)
   else {
     return Card(
       color: Colors.black,
+      borderOnForeground: true,
       semanticContainer: true,
       clipBehavior: Clip.antiAliasWithSaveLayer,
       shape: RoundedRectangleBorder(
