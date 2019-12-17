@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:radiance_flutter/constants.dart';
 
 const LargeTextSize = 32.0;
 const BigTextSize = 26.0;
@@ -85,4 +86,33 @@ Color radianceGetBackgroundColor(bool _darkTheme) {
     return Colors.black;
   }
   return Colors.white;
+}
+
+Card radianceGetCardWidget(bool _darkTheme, Widget _child)
+{
+  if(!_darkTheme) {
+    return Card(
+      semanticContainer: true,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0)
+      ),
+      elevation: 4.0,
+      margin: EdgeInsets.fromLTRB(ConstPadL, ConstPadT, ConstPadR, ConstPadB),
+      child: _child,
+    );
+  }
+  else {
+    return Card(
+      color: Colors.black,
+      semanticContainer: true,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0)
+      ),
+      elevation: 4.0,
+      margin: EdgeInsets.fromLTRB(ConstPadL, ConstPadT, ConstPadR, ConstPadB),
+      child: _child,
+    );
+  }
 }
