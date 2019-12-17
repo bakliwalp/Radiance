@@ -1,6 +1,7 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:radiance_flutter/style.dart';
 
 class RadianceHelper{
@@ -49,9 +50,10 @@ class RadianceHelper{
     }
   }
 
-  void showAlert(String title, String body) {
+  void showAlert(String title, String body, [bool _dismissable]) {
     showDialog(
       context: _context,
+      barrierDismissible: _dismissable == null ? true : _dismissable,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: radianceGetBackgroundColor(isDarkModeActive()),
@@ -59,13 +61,13 @@ class RadianceHelper{
           content: Text(body, style: radianceGetBodyTextStyle(isDarkModeActive())),
           actions: <Widget>[
             FlatButton(
-              child: Text("Exit"),
+              child: Text("Exit", style: radianceGetBodyTextStyle(isDarkModeActive())),
               onPressed: (){
                 SystemNavigator.pop();
               },
             ),
             FlatButton(
-              child: Text("Retry"),
+              child: Text("Retry", style: radianceGetBodyTextStyle(isDarkModeActive())),
               onPressed: (){
                 Navigator.of(context).pop();
               },
@@ -74,6 +76,22 @@ class RadianceHelper{
         );
       }
     );
+  }
+
+  void makePutRequest(String ip, String authToken, String vPin, String value) async {
+    String url = "http://" + ip + "/" + authToken + "/update/" + vPin;
+    String json = "[\"" + value + "\"]";
+
+    Response resp = await put(
+      url,
+      headers: {"Content-type":"application/json"},
+      body: json
+    );
+  }
+
+  Future<Response> makeGetRequest(String ip, String authToken, String vPin) async {
+    String url = "http://" + ip + "/" + authToken + "/get/" + vPin;
+    return(await get(url));
   }
   
 }

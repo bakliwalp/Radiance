@@ -24,7 +24,7 @@ class RadianceApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         appBarTheme: RadianceAppBarThemeDark,
-        canvasColor: Color.fromARGB(0xff, 20,20,20),
+        canvasColor: Color.fromARGB(0xff, 30,30,30),
         cardTheme: RadianceCardTheme,
         accentColor: RadianceTextDarkThemeColor,
       ),

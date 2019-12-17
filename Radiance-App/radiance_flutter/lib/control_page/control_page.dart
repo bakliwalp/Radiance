@@ -1,5 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:radiance_flutter/constants.dart';
 import 'package:radiance_flutter/radiance_helper.dart';
 import 'package:radiance_flutter/style.dart';
@@ -14,6 +16,7 @@ class ControlPage extends StatefulWidget {
 class _ControlPageState extends State<ControlPage> {
 
   double _sliderValue = 30;
+  Timer _timer;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,13 @@ class _ControlPageState extends State<ControlPage> {
     networkState.then((value) {
       if(value[0] == false) {
         radianceHelper.showAlert(ConstNoNetworkAlertTitle, ConstNoNetworkAlertBody);
+      }
+      else {
+        radianceHelper.makeGetRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkSliderVpin)
+        .then((resp) {
+        _sliderValue = double.parse(jsonDecode(resp.body)[0]);
+        print(_sliderValue);
+        });
       }
     });
     
@@ -39,19 +49,16 @@ class _ControlPageState extends State<ControlPage> {
         children: <Widget>[
           // ImageCard
           radianceGetCardWidget(radianceHelper.isDarkModeActive(),
-             /*Image.network(
+             Image.network(
               ConstImageURL,
               fit: BoxFit.cover,
               height: MediaQuery.of(context).size.height * 0.4,
-            )*/
-            CachedNetworkImage(
-              imageUrl: ConstImageURL,
-              color: Colors.grey,
-              fit: BoxFit.cover,
-              height: MediaQuery.of(context).size.height * 0.4,
-              placeholder: (context, ConstImageURL) => CircularProgressIndicator(),
-              errorWidget: (context, ConstImageURL, error) => Icon(Icons.error, color: Colors.red),
             )
+            /*Image.asset(
+              ConstImagePath,
+              fit:  BoxFit.cover,
+              height: MediaQuery.of(context).size.height * 0.4,
+            ),*/
           ),
           // 2nd widget
           radianceGetCardWidget(radianceHelper.isDarkModeActive(), 
@@ -84,12 +91,23 @@ class _ControlPageState extends State<ControlPage> {
                         value: _sliderValue,
                         min: 0.0,
                         max: 100.0,
-                        label: "$_sliderValue",
+                        divisions: 100,
                         inactiveColor: Colors.orange[100],
                         activeColor: Colors.orange,
                         onChanged: (value) {
-                          setState(() => _sliderValue = value.round().toDouble());
-                          print(_sliderValue);
+                          setState(() => _sliderValue = value);
+                          try {
+                            if(_timer.isActive) {
+                              _timer.cancel();
+                            }
+                          }
+                          catch (err) { print(err); }
+                          _timer = Timer(Duration(milliseconds: ConstSliderTimeout), (){
+                            radianceHelper.makePutRequest(
+                              ConstBlynkServerIP, ConstBlynkAuthToken,
+                              ConstBlynkSliderVpin, value.round().toString()
+                            );
+                          });
                         },
                       )
                     ),

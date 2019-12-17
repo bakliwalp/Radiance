@@ -66,7 +66,6 @@ const RadianceAppBarThemeDark =
 const RadianceAppBarThemeLight =
     AppBarTheme(textTheme: TextTheme(title: AppBarTextStyleLight));
 
-
 TextStyle radianceGetTitleTextStyle(bool _darkThem, [double _fontSize]) {
   if(_fontSize == null)
   {
