@@ -32,8 +32,10 @@ class _ControlPageState extends State<ControlPage> {
       else {
         radianceHelper.makeGetRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkSliderVpin)
         .then((resp) {
-        _sliderValue = double.parse(jsonDecode(resp.body)[0]);
-        print(_sliderValue);
+          print(_sliderValue);
+          setState(() {
+            _sliderValue = double.parse(jsonDecode(resp.body)[0]);
+          });
         });
       }
     });
