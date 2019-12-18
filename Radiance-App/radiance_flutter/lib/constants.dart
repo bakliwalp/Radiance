@@ -7,13 +7,19 @@ const String ConstImagePath = "assets/images/bg.jpg";
 const String ConstNoNetworkAlertTitle = "No Internet";
 const String ConstNoNetworkAlertBody = "Please connect to a Wi-Fi network or mobile data to continue.";
 
-const double ConstPadL = 16;
-const double ConstPadR = 16;
+const double ConstPadL = 14;
+const double ConstPadR = 14;
 const double ConstPadT = 12;
 const double ConstPadB = 12;
 
-const String constSliderLabel = "Lamp Brightness";
+// Shared Pref keys
+const String ConstSPSliderKey = "spSliderKey";
 
+// UI Labels
+const String constSliderLabel = "Lamp Dimmer";
+const String constSliderSwitch = "Switch Lamp ON/OFF";
+
+// Timer timeouts
 const int ConstSliderTimeout = 70;
 
 // Blynk IoT Config Constants

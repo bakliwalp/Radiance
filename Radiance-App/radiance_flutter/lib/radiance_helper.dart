@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:radiance_flutter/style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RadianceHelper{
 
@@ -92,6 +93,27 @@ class RadianceHelper{
   Future<Response> makeGetRequest(String ip, String authToken, String vPin) async {
     String url = "http://" + ip + "/" + authToken + "/get/" + vPin;
     return(await get(url));
+  }
+
+  void storeSharedPref({String key, double doubleVal, int intVal, String stringVal, bool boolVal}) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    if(doubleVal != null) {
+      await sp.setDouble(key, doubleVal);
+    }
+    else if(intVal != null) {
+      await sp.setInt(key, intVal);
+    }
+    else if(stringVal != null) {
+      await sp.setString(key, stringVal);
+    }
+    else if(boolVal != null) {
+      await sp.setBool(key, boolVal);
+    }
+  }
+
+  Future<dynamic> fetchSharedPref({String key}) async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    return sp.get(key);
   }
   
 }

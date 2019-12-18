@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:radiance_flutter/constants.dart';
+import 'radiance_helper.dart';
 
 const LargeTextSize = 32.0;
 const BigTextSize = 26.0;
@@ -77,7 +78,12 @@ TextStyle radianceGetTitleTextStyle(bool _darkThem, [double _fontSize]) {
         color: RadianceTextDarkThemeColor,
       );
     }
-    return TitleTextStyleLight;
+    return TextStyle(
+      fontFamily: FontName,
+      fontWeight: FontWeight.w300,
+      fontSize: _fontSize,
+      color: RadianceTextLightThemeColor,
+    );
   }
   else {
     if (_darkThem) {
@@ -130,4 +136,12 @@ Card radianceGetCardWidget(bool _darkTheme, Widget _child)
       child: _child,
     );
   }
+}
+
+Text radianceGetTextLabel({String textToDisplay, TextAlign textAlignment, RadianceHelper radHelper}) {
+  return Text(
+    textToDisplay,
+    textAlign: textAlignment,
+    style: radianceGetBodyTextStyle(radHelper.isDarkModeActive()),
+  );
 }
