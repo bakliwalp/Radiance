@@ -118,7 +118,7 @@ Card radianceGetCardWidget(bool _darkTheme, Widget _child)
         borderRadius: BorderRadius.circular(16.0)
       ),
       elevation: 4.0,
-      margin: EdgeInsets.fromLTRB(ConstPadL, ConstPadT, ConstPadR, ConstPadB),
+      margin: EdgeInsets.fromLTRB(ConstPadL, ConstPadT/1.5, ConstPadR, ConstPadB),
       child: _child,
     );
   }
@@ -132,7 +132,7 @@ Card radianceGetCardWidget(bool _darkTheme, Widget _child)
         borderRadius: BorderRadius.circular(16.0)
       ),
       elevation: 4.0,
-      margin: EdgeInsets.fromLTRB(ConstPadL, ConstPadT, ConstPadR, ConstPadB),
+      margin: EdgeInsets.fromLTRB(ConstPadL, ConstPadT/1.5, ConstPadR, ConstPadB),
       child: _child,
     );
   }

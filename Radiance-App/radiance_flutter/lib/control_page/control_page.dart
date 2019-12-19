@@ -33,7 +33,7 @@ class _ControlPageState extends State<ControlPage> {
     Future<List> networkState = radianceHelper.isNetworkConnected();
     networkState.then((value) {
       if(value[0] == false) {
-        radianceHelper.showAlert(ConstNoNetworkAlertTitle, ConstNoNetworkAlertBody);
+        radianceHelper.showAlert(ConstNoNetworkAlertTitle, ConstNoNetworkAlertBody, false);
       }
       else {
         // execute only if slider is not moved manually
@@ -84,6 +84,8 @@ class _ControlPageState extends State<ControlPage> {
               }
             });
           });
+          // set this line in last to counteracting auto trigger of build function - dirty workaround!
+          _manuallyChanged = true;
         }
       }
     });
@@ -100,7 +102,7 @@ class _ControlPageState extends State<ControlPage> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Platform.isIOS ? Icon(Icons.menu) : Icon(Icons.menu),
+            icon: Platform.isIOS ? Icon(Icons.menu) : Icon(Icons.more_vert),
             iconSize: 28.0,
             onPressed: () => {
               //TODO - Implement config page here
@@ -109,7 +111,7 @@ class _ControlPageState extends State<ControlPage> {
           ),
         ],
       ),
-      body: 
+      body:
       ListView(
         shrinkWrap: true,
         children: <Widget>[
@@ -119,8 +121,13 @@ class _ControlPageState extends State<ControlPage> {
             children: <Widget>[
               // 1st ImageCard
               radianceGetCardWidget(radianceHelper.isDarkModeActive(),
-                Image.network(
+                /*Image.network(
                   ConstImageURL,
+                  fit: BoxFit.cover,
+                  height: MediaQuery.of(context).size.height * 0.4,
+                ),*/
+                Image.asset(
+                  ConstImagePath,
                   fit: BoxFit.cover,
                   height: MediaQuery.of(context).size.height * 0.4,
                 )
@@ -317,7 +324,7 @@ class _ControlPageState extends State<ControlPage> {
                                   IconButton(
                                     padding: EdgeInsets.only(right: ConstPadR/2),
                                     icon: Icon(Icons.remove_circle_outline),
-                                    color: radianceHelper.isDarkModeActive() ? (_motionTimeoutValue > 0 ? RadianceTextDarkThemeColor : Colors.grey[300]) : (_motionTimeoutValue > 0 ? RadianceTextLightThemeColor : Colors.grey[300]),
+                                    color: radianceHelper.isDarkModeActive() ? (_motionTimeoutValue > 0 ? RadianceTextDarkThemeColor : Color.fromARGB(0xff, 50, 50, 50)) : (_motionTimeoutValue > 0 ? RadianceTextLightThemeColor : Colors.grey[300]),
                                     onPressed: () => onTimeoutMinus(radianceHelper),
                                     tooltip: "Reduce Timeout",
                                   ),
@@ -329,7 +336,7 @@ class _ControlPageState extends State<ControlPage> {
                                   IconButton(
                                     padding: EdgeInsets.only(left: ConstPadL, right: ConstPadR/2),
                                     icon: Icon(Icons.add_circle_outline),
-                                    color: radianceHelper.isDarkModeActive() ? (_motionTimeoutValue < _motionTimeoutList.length-1 ? RadianceTextDarkThemeColor : Colors.grey[300]) : (_motionTimeoutValue < _motionTimeoutList.length-1 ? RadianceTextLightThemeColor : Colors.grey[300]),
+                                    color: radianceHelper.isDarkModeActive() ? (_motionTimeoutValue < _motionTimeoutList.length-1 ? RadianceTextDarkThemeColor : Color.fromARGB(0xff, 50, 50, 50)) : (_motionTimeoutValue < _motionTimeoutList.length-1 ? RadianceTextLightThemeColor : Colors.grey[300]),
                                     onPressed: () => onTimeoutPlus(radianceHelper),
                                     tooltip: "Increase Timeout",
                                   ),
@@ -376,11 +383,68 @@ class _ControlPageState extends State<ControlPage> {
                             children: <Widget>[
                               Checkbox(
                                 value: _motionControl,
+                                activeColor: RadianceTextDarkThemeColor,
                                 onChanged: (val) {
                                   setState(() => _motionControl = val);
                                   radianceHelper.makePutRequest(ConstBlynkServerIP, ConstBlynkAuthToken,
                                     ConstBlynkMotionControlVpin, _motionControl ? "1" : "2");
                                 },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Add NodeMCU soft-reset button
+                    Container(
+                      padding: EdgeInsets.only(left: ConstPadL, right: ConstPadR, bottom: ConstPadB),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  IconButton(
+                                    padding: EdgeInsets.only(right: ConstPadR/2),
+                                    icon: Icon(Icons.refresh),
+                                    color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
+                                    onPressed: () => {},
+                                  ),
+                                  radianceGetTextLabel(
+                                    textToDisplay: constResetLabel,
+                                    textAlignment: TextAlign.center,
+                                    radHelper: radianceHelper
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          // Add Raised Button
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              RaisedButton(
+                                color: radianceHelper.isDarkModeActive() ? Colors.black : Colors.white,
+                                highlightElevation: 4.0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                  side: BorderSide(
+                                    color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
+                                    width: 2.0
+                                  )
+                                ),
+                                onPressed: () => resetHardware(radianceHelper),
+                                child: radianceGetTextLabel(
+                                  textAlignment: TextAlign.center,
+                                  textToDisplay: constResetButtonText,
+                                  radHelper: radianceHelper
+                                ),
                               ),
                             ],
                           ),
@@ -425,6 +489,25 @@ class _ControlPageState extends State<ControlPage> {
         intVal: _motionTimeoutValue
       );
     }
+  }
+
+  void resetHardware(RadianceHelper radianceHelper) {
+    print("Reset Initiated...");
+    radianceHelper.makePutRequest(ConstBlynkServerIP,  ConstBlynkAuthToken, ConstBlynkResetVpin, "1");
+    Timer(
+      Duration(milliseconds: 500), () {
+        radianceHelper.makePutRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkResetVpin, "0");
+        print("Reset Cleared!");
+      }
+    );
+  }
+
+  void rebuildAllChildren(BuildContext context) {
+    void rebuild(Element el) {
+      el.markNeedsBuild();
+      el.visitChildren(rebuild);
+    }
+    (context as Element).visitChildren(rebuild);
   }
 }
 

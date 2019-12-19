@@ -58,7 +58,13 @@ class RadianceHelper{
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: radianceGetBackgroundColor(isDarkModeActive()),
-          title: Text(title, style: radianceGetTitleTextStyle(isDarkModeActive())),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: isDarkModeActive() ? Colors.orange : Colors.transparent,
+              width: 2.0
+            )
+          ),
+          title: Text(title, style: radianceGetTitleTextStyle(isDarkModeActive(),22.0)),
           content: Text(body, style: radianceGetBodyTextStyle(isDarkModeActive())),
           actions: <Widget>[
             FlatButton(
