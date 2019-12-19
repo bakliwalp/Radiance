@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:radiance_flutter/control_page/control_page.dart';
-import 'package:radiance_flutter/radiance_helper.dart';
 import 'package:radiance_flutter/style.dart';
 
 void main() => runApp(RadianceApp());

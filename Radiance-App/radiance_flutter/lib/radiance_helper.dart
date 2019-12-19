@@ -83,7 +83,7 @@ class RadianceHelper{
     String url = "http://" + ip + "/" + authToken + "/update/" + vPin;
     String json = "[\"" + value + "\"]";
 
-    Response resp = await put(
+    await put(
       url,
       headers: {"Content-type":"application/json"},
       body: json

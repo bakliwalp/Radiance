@@ -14,10 +14,13 @@ const double ConstPadB = 12;
 
 // Shared Pref keys
 const String ConstSPSliderKey = "spSliderKey";
+const String ConstSPTimeoutKey = "spTimeoutKey";
 
 // UI Labels
 const String constSliderLabel = "Lamp Dimmer";
 const String constSliderSwitch = "Switch Lamp ON/OFF";
+const String constTimerLabel = "Motion Timeout";
+const String constMotionLabel = "Motion Sensing";
 
 // Timer timeouts
 const int ConstSliderTimeout = 70;
@@ -26,4 +29,6 @@ const int ConstSliderTimeout = 70;
 
 const String ConstBlynkServerIP = "188.166.206.43";
 const String ConstBlynkAuthToken = "tMejVGQgCMiN5REr2kp4HNkd0IH4BNba";
+const String ConstBlynkMotionControlVpin = "V1";
 const String ConstBlynkSliderVpin = "V2";
+const String ConstBlynkMotionVpin = "V3";
