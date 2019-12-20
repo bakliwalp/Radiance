@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:radiance_flutter/constants.dart';
 import 'package:radiance_flutter/radiance_helper.dart';
+import 'package:radiance_flutter/setting_page/setting_page.dart';
 import 'package:radiance_flutter/style.dart';
 
 import '../constants.dart';
@@ -97,15 +98,18 @@ class _ControlPageState extends State<ControlPage> {
         leading: IconButton(
           icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
           iconSize: 28.0,
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => exit(0), // Navigator.of(context).pop(),
           color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
         ),
         actions: <Widget>[
           IconButton(
-            icon: Platform.isIOS ? Icon(Icons.menu) : Icon(Icons.more_vert),
-            iconSize: 28.0,
+            icon: Platform.isIOS ? Icon(Icons.menu) : Icon(Icons.settings),
+            iconSize: 32.0,
             onPressed: () => {
-              //TODO - Implement config page here
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingPage())
+              )
             },
             color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
           ),
@@ -500,14 +504,6 @@ class _ControlPageState extends State<ControlPage> {
         print("Reset Cleared!");
       }
     );
-  }
-
-  void rebuildAllChildren(BuildContext context) {
-    void rebuild(Element el) {
-      el.markNeedsBuild();
-      el.visitChildren(rebuild);
-    }
-    (context as Element).visitChildren(rebuild);
   }
 }
 
