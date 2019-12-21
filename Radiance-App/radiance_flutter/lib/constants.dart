@@ -37,7 +37,7 @@ const int ConstSliderTimeout = 70;
 
 // Blynk IoT Config Constants
 const String ConstBlynkServerIP = "188.166.206.43";
-const String ConstBlynkAuthToken = "tMejVGQgCMiN5REr2kp4HNkd0IH4BNba";
+const String ConstBlynkAuthToken = "ADD YOUR BLYNK AUTH TOKEN HERE";
 const String ConstBlynkMotionControlVpin = "V1";
 const String ConstBlynkSliderVpin = "V2";
 const String ConstBlynkMotionVpin = "V3";
