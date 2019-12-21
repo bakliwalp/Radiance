@@ -25,10 +25,18 @@ class _ControlPageState extends State<ControlPage> {
   List _motionTimeoutList = [1,2,3,5,10,15,30];
   bool _manuallyChanged = false;
 
+  String _fetchedAuthToken = "";
+  String _fetchedBlynkIp = "";
+
   @override
   Widget build(BuildContext context) {
 
     final RadianceHelper radianceHelper = RadianceHelper(context);
+    final RadianceSharedPref radianceSharedPref = RadianceSharedPref();
+
+    // fetch data from shared prefs
+    radianceSharedPref.fetchSharedPref(key: ConstSPBlynkIPKey).then((val) => _fetchedBlynkIp = val);
+    radianceSharedPref.fetchSharedPref(key: ConstSPBlynkAuthTokenKey).then((val) => _fetchedAuthToken = val);
 
     // Check network
     Future<List> networkState = radianceHelper.isNetworkConnected();
@@ -40,7 +48,7 @@ class _ControlPageState extends State<ControlPage> {
         // execute only if slider is not moved manually
         if(!_manuallyChanged) {
           // fetch V2 from blynk server
-          radianceHelper.makeGetRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkSliderVpin)
+          radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkSliderVpin)
           .then((resp) {
             print(_sliderValue);
             setState(() {
@@ -49,7 +57,7 @@ class _ControlPageState extends State<ControlPage> {
                 _sliderSwitch = true;
               }
               else {
-                radianceHelper.fetchSharedPref(key: ConstSPSliderKey).then((val) {
+                radianceSharedPref.fetchSharedPref(key: ConstSPSliderKey).then((val) {
                   _sliderValue = val;
                   _sliderSwitch = false;
                 });
@@ -57,7 +65,7 @@ class _ControlPageState extends State<ControlPage> {
             });
           });
           // fetch v3 from blynk server
-          radianceHelper.makeGetRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkMotionVpin)
+          radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkMotionVpin)
           .then((resp) {
             int _fetchedValue = int.parse(jsonDecode(resp.body)[0]);
             setState(() {
@@ -66,14 +74,14 @@ class _ControlPageState extends State<ControlPage> {
                 _motionTimeoutValue = _fetchedValue;
               }
               else {
-                radianceHelper.fetchSharedPref(key: ConstSPTimeoutKey).then((val) {
+                radianceSharedPref.fetchSharedPref(key: ConstSPTimeoutKey).then((val) {
                   _motionTimeoutValue = val;
                 });
               }
             });
           });
           // fetch v1 from blynk server
-          radianceHelper.makeGetRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkMotionControlVpin)
+          radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkMotionControlVpin)
           .then((resp) {
             int _fetchedValue = int.parse(jsonDecode(resp.body)[0]);
             setState(() {
@@ -105,11 +113,11 @@ class _ControlPageState extends State<ControlPage> {
           IconButton(
             icon: Platform.isIOS ? Icon(Icons.menu) : Icon(Icons.settings),
             iconSize: 32.0,
-            onPressed: () => {
+            onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SettingPage())
-              )
+              );
             },
             color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
           ),
@@ -194,9 +202,9 @@ class _ControlPageState extends State<ControlPage> {
                                       setState(() => _sliderSwitch = value);
                                       if(value) {
                                         // sent last saved slider value to blynk server
-                                        radianceHelper.fetchSharedPref(key: ConstSPSliderKey).then((value) {
+                                        radianceSharedPref.fetchSharedPref(key: ConstSPSliderKey).then((value) {
                                           radianceHelper.makePutRequest(
-                                            ConstBlynkServerIP, ConstBlynkAuthToken,
+                                            _fetchedBlynkIp, _fetchedAuthToken,
                                             ConstBlynkSliderVpin, value.toString());
                                           }
                                         );
@@ -204,7 +212,7 @@ class _ControlPageState extends State<ControlPage> {
                                       else {
                                         // sent 0 to blynk server to turn off the lamp
                                         radianceHelper.makePutRequest(
-                                          ConstBlynkServerIP, ConstBlynkAuthToken,
+                                          _fetchedBlynkIp, _fetchedAuthToken,
                                           ConstBlynkSliderVpin, "0");
                                       }                                    
                                     },
@@ -263,10 +271,10 @@ class _ControlPageState extends State<ControlPage> {
                                 catch (err) { print(err); }
                                 _timer = Timer(Duration(milliseconds: ConstSliderTimeout), (){
                                   radianceHelper.makePutRequest(
-                                    ConstBlynkServerIP, ConstBlynkAuthToken,
+                                    _fetchedBlynkIp, _fetchedAuthToken,
                                     ConstBlynkSliderVpin, value.round().toString()
                                   );
-                                  radianceHelper.storeSharedPref(
+                                  radianceSharedPref.storeSharedPref(
                                     key: ConstSPSliderKey,
                                     doubleVal: value
                                   );                              
@@ -329,7 +337,7 @@ class _ControlPageState extends State<ControlPage> {
                                     padding: EdgeInsets.only(right: ConstPadR/2),
                                     icon: Icon(Icons.remove_circle_outline),
                                     color: radianceHelper.isDarkModeActive() ? (_motionTimeoutValue > 0 ? RadianceTextDarkThemeColor : Color.fromARGB(0xff, 50, 50, 50)) : (_motionTimeoutValue > 0 ? RadianceTextLightThemeColor : Colors.grey[300]),
-                                    onPressed: () => onTimeoutMinus(radianceHelper),
+                                    onPressed: () => onTimeoutMinus(radianceHelper, radianceSharedPref),
                                     tooltip: "Reduce Timeout",
                                   ),
                                   radianceGetTextLabel(
@@ -341,7 +349,7 @@ class _ControlPageState extends State<ControlPage> {
                                     padding: EdgeInsets.only(left: ConstPadL, right: ConstPadR/2),
                                     icon: Icon(Icons.add_circle_outline),
                                     color: radianceHelper.isDarkModeActive() ? (_motionTimeoutValue < _motionTimeoutList.length-1 ? RadianceTextDarkThemeColor : Color.fromARGB(0xff, 50, 50, 50)) : (_motionTimeoutValue < _motionTimeoutList.length-1 ? RadianceTextLightThemeColor : Colors.grey[300]),
-                                    onPressed: () => onTimeoutPlus(radianceHelper),
+                                    onPressed: () => onTimeoutPlus(radianceHelper, radianceSharedPref),
                                     tooltip: "Increase Timeout",
                                   ),
                                 ],
@@ -390,7 +398,7 @@ class _ControlPageState extends State<ControlPage> {
                                 activeColor: RadianceTextDarkThemeColor,
                                 onChanged: (val) {
                                   setState(() => _motionControl = val);
-                                  radianceHelper.makePutRequest(ConstBlynkServerIP, ConstBlynkAuthToken,
+                                  radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken,
                                     ConstBlynkMotionControlVpin, _motionControl ? "1" : "2");
                                 },
                               ),
@@ -465,30 +473,30 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-  void onTimeoutPlus(RadianceHelper radianceHelper) {
+  void onTimeoutPlus(RadianceHelper radianceHelper, RadianceSharedPref radianceSharedPref) {
     if(_motionTimeoutValue < _motionTimeoutList.length-1) {
       _manuallyChanged = true;
       setState(() {
         _motionTimeoutValue++;
       });
-      radianceHelper.makePutRequest(ConstBlynkServerIP, ConstBlynkAuthToken,
+      radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken,
         ConstBlynkMotionVpin, _motionTimeoutList[_motionTimeoutValue].toString());
-      radianceHelper.storeSharedPref(
+      radianceSharedPref.storeSharedPref(
         key: ConstSPTimeoutKey,
         intVal: _motionTimeoutValue
       );
     }
   }
 
-  void onTimeoutMinus(RadianceHelper radianceHelper) {
+  void onTimeoutMinus(RadianceHelper radianceHelper, RadianceSharedPref radianceSharedPref) {
     if(_motionTimeoutValue > 0) {
       _manuallyChanged = true;
       setState(() {
         _motionTimeoutValue--;
       });
-      radianceHelper.makePutRequest(ConstBlynkServerIP, ConstBlynkAuthToken,
+      radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken,
         ConstBlynkMotionVpin, _motionTimeoutList[_motionTimeoutValue].toString());
-      radianceHelper.storeSharedPref(
+      radianceSharedPref.storeSharedPref(
         key: ConstSPTimeoutKey,
         intVal: _motionTimeoutValue
       );
@@ -497,10 +505,10 @@ class _ControlPageState extends State<ControlPage> {
 
   void resetHardware(RadianceHelper radianceHelper) {
     print("Reset Initiated...");
-    radianceHelper.makePutRequest(ConstBlynkServerIP,  ConstBlynkAuthToken, ConstBlynkResetVpin, "1");
+    radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkResetVpin, "1");
     Timer(
       Duration(milliseconds: 500), () {
-        radianceHelper.makePutRequest(ConstBlynkServerIP, ConstBlynkAuthToken, ConstBlynkResetVpin, "0");
+        radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkResetVpin, "0");
         print("Reset Cleared!");
       }
     );

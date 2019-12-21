@@ -100,6 +100,11 @@ class RadianceHelper{
     String url = "http://" + ip + "/" + authToken + "/get/" + vPin;
     return(await get(url));
   }
+}
+
+class RadianceSharedPref {
+
+  RadianceSharedPref();
 
   void storeSharedPref({String key, double doubleVal, int intVal, String stringVal, bool boolVal}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -121,5 +126,5 @@ class RadianceHelper{
     SharedPreferences sp = await SharedPreferences.getInstance();
     return sp.get(key);
   }
-  
+
 }

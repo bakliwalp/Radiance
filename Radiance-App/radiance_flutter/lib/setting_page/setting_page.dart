@@ -15,7 +15,20 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> {
 
-  final ipController = TextEditingController();
+  String _blynkIp = "";
+  String _blynkToken = "";
+  RadianceSharedPref radianceSharedPref = RadianceSharedPref();
+
+  @override
+  void initState() {
+    super.initState();
+    radianceSharedPref.fetchSharedPref(key: ConstSPBlynkIPKey).then((val) {
+      _blynkIp = val;
+    });
+    radianceSharedPref.fetchSharedPref(key: ConstSPBlynkAuthTokenKey).then((val) {
+      _blynkToken = val;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +60,7 @@ class _SettingPageState extends State<SettingPage> {
                     child: radianceGetSettingTextfield(
                       ic: Icons.cloud_queue,
                       radianceHelper: radianceHelper,
-                      initText: "XXX.XXX.XXX.XXX",
+                      initText: _blynkIp,
                       labelString: constBlynkServerIpHint,
                       functionName: settingsStoreIp,
                       context: context
@@ -58,7 +71,7 @@ class _SettingPageState extends State<SettingPage> {
                     child: radianceGetSettingTextfield(
                       ic: Icons.security,
                       radianceHelper: radianceHelper,
-                      initText: "",
+                      initText: _blynkToken,
                       labelString: constBlynkServerAuthTokenHint,
                       functionName: settingsStoreAuthToken,
                       context: context
@@ -130,15 +143,15 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  void settingsStoreIp(String ip, RadianceHelper radianceHelper) {
-    radianceHelper.storeSharedPref(
+  void settingsStoreIp(String ip, RadianceSharedPref radianceSharedPref) {
+    radianceSharedPref.storeSharedPref(
       key: ConstSPBlynkIPKey,
       stringVal: ip
     );
   }
 
-  void settingsStoreAuthToken(String token, RadianceHelper radianceHelper) {
-    radianceHelper.storeSharedPref(
+  void settingsStoreAuthToken(String token, RadianceSharedPref radianceSharedPref) {
+    radianceSharedPref.storeSharedPref(
       key: ConstSPBlynkAuthTokenKey,
       stringVal: token
     );
