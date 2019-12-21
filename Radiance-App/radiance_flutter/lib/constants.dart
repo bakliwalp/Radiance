@@ -27,6 +27,7 @@ const String constTimerLabel = "Motion Timeout";
 const String constMotionLabel = "Motion Sensing";
 const String constResetLabel = "Reset Hardware";
 const String constResetButtonText = "Reset";
+const String constSaveButtonText = "Save";
 
 const String constBlynkServerIpHint = "URL/IP of Blynk Server";
 const String constBlynkServerAuthTokenHint = "Blynk IoT Auth Token";

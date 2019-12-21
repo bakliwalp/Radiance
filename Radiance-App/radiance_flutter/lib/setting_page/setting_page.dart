@@ -21,13 +21,18 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   void initState() {
-    super.initState();
     radianceSharedPref.fetchSharedPref(key: ConstSPBlynkIPKey).then((val) {
-      _blynkIp = val;
+      setState(() {
+        _blynkIp = val;
+      });
     });
     radianceSharedPref.fetchSharedPref(key: ConstSPBlynkAuthTokenKey).then((val) {
-      _blynkToken = val;
+      setState(() {
+        _blynkToken = val;
+      });
     });
+    sleep(Duration(milliseconds: 10));
+    super.initState();
   }
 
   @override
@@ -41,7 +46,11 @@ class _SettingPageState extends State<SettingPage> {
         leading: IconButton(
           icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
           iconSize: 28.0,
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            settingsStoreIp(_blynkIp, radianceSharedPref);
+            settingsStoreAuthToken(_blynkToken, radianceSharedPref);
+            Navigator.of(context).pop();
+          },
           color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
         ),
       ),
@@ -63,7 +72,8 @@ class _SettingPageState extends State<SettingPage> {
                       initText: _blynkIp,
                       labelString: constBlynkServerIpHint,
                       functionName: settingsStoreIp,
-                      context: context
+                      context: context,
+                      key: 1,
                     ),
                   ),
                   Container(
@@ -74,7 +84,54 @@ class _SettingPageState extends State<SettingPage> {
                       initText: _blynkToken,
                       labelString: constBlynkServerAuthTokenHint,
                       functionName: settingsStoreAuthToken,
-                      context: context
+                      context: context,
+                      key: 2,
+                    ),
+                  ),
+                  RaisedButton(
+                    color: radianceHelper.isDarkModeActive() ? Colors.black : Colors.white,
+                    highlightElevation: 4.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      side: BorderSide(
+                        color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
+                        width: 2.0
+                      )
+                    ),
+                    onPressed: () {
+                      settingsStoreIp(_blynkIp, radianceSharedPref);
+                      settingsStoreAuthToken(_blynkToken, radianceSharedPref);
+                      Flushbar(
+                        messageText: 
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(Icons.info_outline, size: 30.0, color: Colors.black),
+                              onPressed: (){},
+                            ),
+                            Text(
+                              "Changes Saved!",
+                              style: TextStyle(
+                                fontFamily: FontName,
+                                fontWeight: FontWeight.w300,
+                                fontSize: 20.0,
+                                color: RadianceTextLightThemeColor,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                        shouldIconPulse: false,
+                        backgroundColor: RadianceTextDarkThemeColor,
+                        duration: Duration(seconds: 5),
+                      )..show(context);
+                    },
+                    child: radianceGetTextLabel(
+                      textAlignment: TextAlign.center,
+                      textToDisplay: constSaveButtonText,
+                      radHelper: radianceHelper
                     ),
                   ),
                 ],
@@ -87,7 +144,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   TextField radianceGetSettingTextfield({RadianceHelper radianceHelper, IconData ic, String labelString, 
-  String initText, Function functionName, BuildContext context}) {
+  String initText, Function functionName, BuildContext context, int key}) {
     return TextField(
       decoration: InputDecoration(
         icon: Icon(
@@ -110,40 +167,23 @@ class _SettingPageState extends State<SettingPage> {
       cursorColor: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
       style: radianceGetBodyTextStyle(radianceHelper.isDarkModeActive()),
       keyboardAppearance: radianceHelper.isDarkModeActive() ? Brightness.dark : Brightness.light,
+      autofocus: true,
       controller: TextEditingController()..text = initText,
-      onSubmitted: (val) {
-        functionName(val, radianceHelper);
-        Flushbar(
-          messageText: 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.info_outline, size: 30.0, color: Colors.black),
-                onPressed: (){},
-              ),
-              Text(
-                "Changes Saved!",
-                style: TextStyle(
-                  fontFamily: FontName,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 20.0,
-                  color: RadianceTextLightThemeColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          shouldIconPulse: false,
-          backgroundColor: RadianceTextDarkThemeColor,
-          duration: Duration(seconds: 5),
-        )..show(context);
+      onChanged: (val) {
+        //functionName(val, radianceSharedPref);
+        print(key);
+        if(key == 1) {
+          _blynkIp = val;
+        }
+        else {
+          _blynkToken = val;
+        }
       },
     );
   }
 
   void settingsStoreIp(String ip, RadianceSharedPref radianceSharedPref) {
+    print(ip);
     radianceSharedPref.storeSharedPref(
       key: ConstSPBlynkIPKey,
       stringVal: ip
@@ -151,6 +191,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   void settingsStoreAuthToken(String token, RadianceSharedPref radianceSharedPref) {
+    print(token);
     radianceSharedPref.storeSharedPref(
       key: ConstSPBlynkAuthTokenKey,
       stringVal: token

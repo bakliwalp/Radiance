@@ -24,6 +24,7 @@ class _ControlPageState extends State<ControlPage> {
   int _motionTimeoutValue = 0;
   List _motionTimeoutList = [1,2,3,5,10,15,30];
   bool _manuallyChanged = false;
+  bool _alreadyFetched = false;
 
   String _fetchedAuthToken = "";
   String _fetchedBlynkIp = "";
@@ -35,69 +36,98 @@ class _ControlPageState extends State<ControlPage> {
     final RadianceSharedPref radianceSharedPref = RadianceSharedPref();
 
     // fetch data from shared prefs
-    radianceSharedPref.fetchSharedPref(key: ConstSPBlynkIPKey).then((val) => _fetchedBlynkIp = val);
-    radianceSharedPref.fetchSharedPref(key: ConstSPBlynkAuthTokenKey).then((val) => _fetchedAuthToken = val);
-
-    // Check network
-    Future<List> networkState = radianceHelper.isNetworkConnected();
-    networkState.then((value) {
-      if(value[0] == false) {
-        radianceHelper.showAlert(ConstNoNetworkAlertTitle, ConstNoNetworkAlertBody, false);
-      }
-      else {
-        // execute only if slider is not moved manually
-        if(!_manuallyChanged) {
-          // fetch V2 from blynk server
-          radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkSliderVpin)
-          .then((resp) {
-            print(_sliderValue);
-            setState(() {
-              _sliderValue = double.parse(jsonDecode(resp.body)[0]);
-              if (_sliderValue > 0) {
-                _sliderSwitch = true;
-              }
-              else {
-                radianceSharedPref.fetchSharedPref(key: ConstSPSliderKey).then((val) {
-                  _sliderValue = val;
-                  _sliderSwitch = false;
-                });
-              }
-            });
-          });
-          // fetch v3 from blynk server
-          radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkMotionVpin)
-          .then((resp) {
-            int _fetchedValue = int.parse(jsonDecode(resp.body)[0]);
-            setState(() {
-              _fetchedValue = _motionTimeoutList.indexOf(_fetchedValue);
-              if(_fetchedValue > -1) {
-                _motionTimeoutValue = _fetchedValue;
-              }
-              else {
-                radianceSharedPref.fetchSharedPref(key: ConstSPTimeoutKey).then((val) {
-                  _motionTimeoutValue = val;
-                });
-              }
-            });
-          });
-          // fetch v1 from blynk server
-          radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkMotionControlVpin)
-          .then((resp) {
-            int _fetchedValue = int.parse(jsonDecode(resp.body)[0]);
-            setState(() {
-              if(_fetchedValue == 1) {
-                _motionControl = true;
-              }
-              else if (_fetchedValue == 2) {
-                _motionControl = false;
-              }
-            });
-          });
-          // set this line in last to counteracting auto trigger of build function - dirty workaround!
-          _manuallyChanged = true;
+    if(!_alreadyFetched) {
+      radianceSharedPref.fetchSharedPref(key: ConstSPBlynkIPKey).then((val) {
+        if(val == null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SettingPage())
+          );
         }
-      }
-    });
+        else {
+          _fetchedBlynkIp = val;
+
+           radianceSharedPref.fetchSharedPref(key: ConstSPBlynkAuthTokenKey).then((val) {
+            if(val == null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingPage())
+              );
+            }
+            else {
+              _fetchedAuthToken = val;
+
+              print("printing..");
+              print(_fetchedBlynkIp);
+              print(_fetchedAuthToken);
+
+              // Check network
+              Future<List> networkState = radianceHelper.isNetworkConnected();
+              networkState.then((value) {
+                if(value[0] == false) {
+                  radianceHelper.showAlert(ConstNoNetworkAlertTitle, ConstNoNetworkAlertBody, false);
+                }
+                else {
+                  // execute only if slider is not moved manually
+                  if(!_manuallyChanged && _fetchedAuthToken.isNotEmpty && _fetchedBlynkIp.isNotEmpty) {
+                    // fetch V2 from blynk server
+                    radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkSliderVpin)
+                    .then((resp) {
+                      print(_sliderValue);
+                      setState(() {
+                        _sliderValue = double.parse(jsonDecode(resp.body)[0]);
+                        if (_sliderValue > 0) {
+                          _sliderSwitch = true;
+                        }
+                        else {
+                          radianceSharedPref.fetchSharedPref(key: ConstSPSliderKey).then((val) {
+                            _sliderValue = val;
+                            _sliderSwitch = false;
+                          });
+                        }
+                      });
+                    });
+                    // fetch v3 from blynk server
+                    radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkMotionVpin)
+                    .then((resp) {
+                      int _fetchedValue = int.parse(jsonDecode(resp.body)[0]);
+                      setState(() {
+                        _fetchedValue = _motionTimeoutList.indexOf(_fetchedValue);
+                        if(_fetchedValue > -1) {
+                          _motionTimeoutValue = _fetchedValue;
+                        }
+                        else {
+                          radianceSharedPref.fetchSharedPref(key: ConstSPTimeoutKey).then((val) {
+                            _motionTimeoutValue = val;
+                          });
+                        }
+                      });
+                    });
+                    // fetch v1 from blynk server
+                    radianceHelper.makeGetRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkMotionControlVpin)
+                    .then((resp) {
+                      int _fetchedValue = int.parse(jsonDecode(resp.body)[0]);
+                      setState(() {
+                        if(_fetchedValue == 1) {
+                          _motionControl = true;
+                        }
+                        else if (_fetchedValue == 2) {
+                          _motionControl = false;
+                        }
+                      });
+                    });
+                    // set this line in last to counteracting auto trigger of build function - dirty workaround!
+                    _manuallyChanged = true;
+                  }
+                }
+              });
+
+            }
+          });
+        }
+      });
+      _alreadyFetched = true;
+    }
     
     return Scaffold(
       appBar: AppBar(
@@ -133,11 +163,6 @@ class _ControlPageState extends State<ControlPage> {
             children: <Widget>[
               // 1st ImageCard
               radianceGetCardWidget(radianceHelper.isDarkModeActive(),
-                /*Image.network(
-                  ConstImageURL,
-                  fit: BoxFit.cover,
-                  height: MediaQuery.of(context).size.height * 0.4,
-                ),*/
                 Image.asset(
                   ConstImagePath,
                   fit: BoxFit.cover,
@@ -254,7 +279,7 @@ class _ControlPageState extends State<ControlPage> {
                           Flexible(
                             flex: 1,
                             child: Slider.adaptive(
-                              value: _sliderValue,
+                              value: _sliderValue != null ? _sliderValue : 0.0,
                               min: 0.0,
                               max: 100.0,
                               divisions: 100,
@@ -286,9 +311,9 @@ class _ControlPageState extends State<ControlPage> {
                             width: 50.0,
                             alignment: Alignment.centerLeft,
                             //padding: EdgeInsets.only(right: 20.0),
-                            child: Text('${_sliderValue.toInt()}',
+                            child: _sliderValue != null ? Text('${_sliderValue.toInt()}',
                               style: radianceGetBodyTextStyle(radianceHelper.isDarkModeActive()),
-                            ),
+                            ) : Text(""),
                           ),
                         ],
                       )
@@ -311,7 +336,7 @@ class _ControlPageState extends State<ControlPage> {
                                 children: <Widget>[
                                   IconButton(
                                     padding: EdgeInsets.only(right: ConstPadR/2),
-                                    icon: Icon(Icons.timer),
+                                    icon: Icon(Icons.schedule),
                                     color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
                                     onPressed: () => {},
                                   ),
@@ -393,7 +418,7 @@ class _ControlPageState extends State<ControlPage> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              Checkbox(
+                              Switch.adaptive(
                                 value: _motionControl,
                                 activeColor: RadianceTextDarkThemeColor,
                                 onChanged: (val) {
