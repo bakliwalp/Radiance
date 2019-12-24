@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:radiance_flutter/constants.dart';
 import 'package:radiance_flutter/radiance_helper.dart';
 import 'package:radiance_flutter/setting_page/setting_page.dart';
@@ -39,10 +41,11 @@ class _ControlPageState extends State<ControlPage> {
     if(!_alreadyFetched) {
       radianceSharedPref.fetchSharedPref(key: ConstSPBlynkIPKey).then((val) {
         if(val == null) {
-          Navigator.push(
+          /*Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SettingPage())
-          );
+          );*/
+          Navigator.pushNamed(context, "/setting_page");
         }
         else {
           _fetchedBlynkIp = val;
@@ -136,7 +139,7 @@ class _ControlPageState extends State<ControlPage> {
         leading: IconButton(
           icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
           iconSize: 28.0,
-          onPressed: () => exit(0), // Navigator.of(context).pop(),
+          onPressed: () => SystemNavigator.pop(animated: true),
           color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
         ),
         actions: <Widget>[
@@ -529,12 +532,30 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   void resetHardware(RadianceHelper radianceHelper) {
-    print("Reset Initiated...");
+    Flushbar(
+      duration: Duration(seconds: 2),
+      backgroundColor: RadianceTextDarkThemeColor,
+      messageText: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          // TODO - Rotate icon if possible
+          Icon(
+            Icons.refresh,
+            color: RadianceTextLightThemeColor,
+          ),
+          Text(
+            "\t\tResetting Hardware, Please wait!",
+            textAlign: TextAlign.center,
+            style: RadianceFlushbarStyle,
+          ),
+        ],
+      ),      
+    )..show(context);
     radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkResetVpin, "1");
     Timer(
       Duration(milliseconds: 500), () {
         radianceHelper.makePutRequest(_fetchedBlynkIp, _fetchedAuthToken, ConstBlynkResetVpin, "0");
-        print("Reset Cleared!");
       }
     );
   }

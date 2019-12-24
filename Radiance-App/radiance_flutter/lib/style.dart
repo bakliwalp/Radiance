@@ -61,6 +61,13 @@ const RadianceCardTheme = CardTheme(
       )
     );
 
+const RadianceFlushbarStyle = TextStyle(
+  fontFamily: FontName,
+  fontWeight: FontWeight.w300,
+  fontSize: 16.0,
+  color: RadianceTextLightThemeColor,
+);
+
 const RadianceAppBarThemeDark =
     AppBarTheme(textTheme: TextTheme(title: AppBarTextStyleDark));
 

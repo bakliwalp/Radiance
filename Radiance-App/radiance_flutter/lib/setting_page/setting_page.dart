@@ -31,7 +31,8 @@ class _SettingPageState extends State<SettingPage> {
         _blynkToken = val;
       });
     });
-    sleep(Duration(milliseconds: 10));
+    // Dirty workound to stop continous triggering of build method after 1st install
+    // sleep(Duration(milliseconds: 10));
     super.initState();
   }
 
@@ -47,8 +48,6 @@ class _SettingPageState extends State<SettingPage> {
           icon: Platform.isIOS ? Icon(Icons.arrow_back_ios) : Icon(Icons.arrow_back),
           iconSize: 28.0,
           onPressed: () {
-            settingsStoreIp(_blynkIp, radianceSharedPref);
-            settingsStoreAuthToken(_blynkToken, radianceSharedPref);
             Navigator.of(context).pop();
           },
           color: radianceHelper.isDarkModeActive() ? RadianceTextDarkThemeColor : RadianceTextLightThemeColor,
@@ -108,17 +107,12 @@ class _SettingPageState extends State<SettingPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             IconButton(
-                              icon: Icon(Icons.info_outline, size: 30.0, color: Colors.black),
+                              icon: Icon(Icons.info_outline, size: 24.0, color: Colors.black),
                               onPressed: (){},
                             ),
                             Text(
                               "Changes Saved!",
-                              style: TextStyle(
-                                fontFamily: FontName,
-                                fontWeight: FontWeight.w300,
-                                fontSize: 20.0,
-                                color: RadianceTextLightThemeColor,
-                              ),
+                              style: RadianceFlushbarStyle,
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -141,7 +135,7 @@ class _SettingPageState extends State<SettingPage> {
         ],
       ),
     );
-  }
+  }  
 
   TextField radianceGetSettingTextfield({RadianceHelper radianceHelper, IconData ic, String labelString, 
   String initText, Function functionName, BuildContext context, int key}) {
@@ -170,8 +164,6 @@ class _SettingPageState extends State<SettingPage> {
       autofocus: true,
       controller: TextEditingController()..text = initText,
       onChanged: (val) {
-        //functionName(val, radianceSharedPref);
-        print(key);
         if(key == 1) {
           _blynkIp = val;
         }
@@ -180,6 +172,13 @@ class _SettingPageState extends State<SettingPage> {
         }
       },
     );
+  }
+
+  @protected
+  @mustCallSuper
+  void deactivate(){
+    settingsStoreIp(_blynkIp, radianceSharedPref);
+    settingsStoreAuthToken(_blynkToken, radianceSharedPref);
   }
 
   void settingsStoreIp(String ip, RadianceSharedPref radianceSharedPref) {

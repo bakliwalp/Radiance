@@ -70,13 +70,14 @@ class RadianceHelper{
             FlatButton(
               child: Text("Exit", style: radianceGetBodyTextStyle(isDarkModeActive())),
               onPressed: (){
-                SystemNavigator.pop();
+                SystemNavigator.pop(animated: true);
               },
             ),
             FlatButton(
               child: Text("Retry", style: radianceGetBodyTextStyle(isDarkModeActive())),
               onPressed: (){
-                Navigator.of(context).pop();
+                //Navigator.of(context).pop();
+                Navigator.of(context).pushReplacementNamed('/control_page');
               },
             ),
           ],
