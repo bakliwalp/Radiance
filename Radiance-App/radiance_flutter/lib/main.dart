@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:radiance_flutter/control_page/control_page.dart';
+import 'package:radiance_flutter/setting_page/setting_page.dart';
 import 'package:radiance_flutter/style.dart';
 
 void main() => runApp(RadianceApp());
@@ -35,6 +36,10 @@ class RadianceApp extends StatelessWidget {
         cardTheme: RadianceCardTheme,
         accentColor: RadianceTextDarkThemeColor,
       ),
+      routes: {
+        '/control_page' : (context) => ControlPage(),
+        '/setting_page' : (context) => SettingPage()
+      },
     );
   }
 }
