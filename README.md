@@ -1,4 +1,6 @@
-<img src="https://raw.githubusercontent.com/pranjal-joshi/Radiance/app-radiance/Radiance-App/Screenshots/Screenshots/Poster.jpg" width="800">
+# Radiance
+
+![alt text](https://img.shields.io/badge/build-passing-brightgreen) ![alt text](https://img.shields.io/badge/platform-android%20%7C%20ios-lightgrey) ![GitHub language count](https://img.shields.io/github/languages/count/pranjal-joshi/Radiance) ![GitHub](https://img.shields.io/github/license/pranjal-joshi/Radiance)
 
 ### Quick Links
 
