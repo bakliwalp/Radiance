@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/pranjal-joshi/Radiance/app-radiance/Radiance-App/Screenshots/Screenshots/Poster.jpg" width="800">
 
-### QuickLinks
+### Quick Links
 
 <a href="https://play.google.com/store/apps/details?id=com.cyberfox.radiance"><img src="https://steverichey.github.io/google-play-badge-svg/img/en_get.svg" width="150"></a>
 
@@ -98,7 +98,7 @@ Thanks to **[codeometry.in](https://codeometry.in)** for their awesome tutorial!
 
 ### Setting up the environment
 
-In 2019 ,As compared to Android-Java and Swift, Flutter is a new framework.
+In 2019 ,As compared to Android-Java and Swift, **[Flutter](https://flutter.dev/)** is a new framework.
 
 Here are some helpful links to setup & release your own app using flutter.
 - **[Installation](https://flutter.dev/docs/get-started/install)**
@@ -108,11 +108,11 @@ Here are some helpful links to setup & release your own app using flutter.
 Flutter uses the dart language for application development. You can find the source code in the following directory path
 `Radiance-App/radiance_flutter/`
 
-### Screenshot - App UI and Features
+### App Screenshots - UI and Features
 
 <img src="https://raw.githubusercontent.com/pranjal-joshi/Radiance/app-radiance/Radiance-App/Screenshots/Screenshots/combined.jpg" width="800">
 
-### Download the Application
+### App Download
 
 <a href="https://play.google.com/store/apps/details?id=com.cyberfox.radiance"><img src="https://steverichey.github.io/google-play-badge-svg/img/en_get.svg" width="150"></a>
 
