@@ -7,6 +7,7 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include "creds.h"
 
 #define D_OUT        5
 #define PIR          4
@@ -47,10 +48,6 @@ bool isMotion = false;
 bool isSensed = false;
 int lastAnalogWrite;
 long motionTimeout = 1000*60*1;
-
-char auth[] = "tMejVGQgCMiN5REr2kp4HNkd0IH4BNba";
-char ssid[] = "The EVIL GENIUS";
-char pass[] = "samadhan118017";
 
 void setup() {
   Serial.begin(9600);
