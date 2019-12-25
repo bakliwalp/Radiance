@@ -126,7 +126,7 @@ Any contributions you make are highly appreciated
 5. Open a Pull Request.
 
 ### Author
-- Pranjal Joshi [Emaill(joshi.pranjal5@gmail.com)
+- Pranjal Joshi - <joshi.pranjal5@gmail.com>
 
 ### License
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/pranjal-joshi/Radiance/blob/master/LICENSE) file for details.
